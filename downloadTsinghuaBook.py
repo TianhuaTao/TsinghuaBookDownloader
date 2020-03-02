@@ -5,25 +5,17 @@ import pickle
 import os
 import img2pdf
 import re
+import pathlib
 
-# def save_cookie(driver, path):
-#     with open(path, 'wb') as filehandler:
-#         pickle.dump(driver.get_cookies(), filehandler)
-
-# def load_cookie(driver, path):
-#      with open(path, 'rb') as cookiesfile:
-#          cookies = pickle.load(cookiesfile)
-#          for cookie in cookies:
-#              driver.add_cookie(cookie)
 
 
 bookid = 'bdeab318-1caf-443d-82e5-2b905cef6098'
 
 book_url_template = 'http://reserves.lib.tsinghua.edu.cn/Search/BookDetail?bookId={}'
 book_title = 'untitled'
-base_dir = os.path.join( r'D:\tmp_dl', bookid)
-if not os.path.exists(base_dir):
-    os.mkdir(base_dir)
+base_dir = os.path.abspath(os.path.join('./tmp_dl', bookid))
+pathlib.Path(base_dir).mkdir(parents=True, exist_ok=True)
+
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("user-data-dir=selenium") 
 chrome_options.add_experimental_option("prefs", {
