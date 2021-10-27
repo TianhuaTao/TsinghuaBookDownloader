@@ -6,10 +6,10 @@ import os
 import img2pdf
 import re
 import pathlib
+import time
 
 
-
-bookid = 'bdeab318-1caf-443d-82e5-2b905cef6098'
+bookid = 'de6090ca-f5e1-49d5-a509-07ee0dc6e63e'
 
 book_url_template = 'http://reserves.lib.tsinghua.edu.cn/Search/BookDetail?bookId={}'
 book_title = 'untitled'
@@ -25,14 +25,14 @@ chrome_options.add_experimental_option("prefs", {
   "safebrowsing.enabled": True,
   "profile.default_content_setting_values.automatic_downloads": 1
 })
-driver = webdriver.Chrome(chrome_options=chrome_options)
+driver = webdriver.Chrome(chrome_options=chrome_options, executable_path='./chromedriver')
 
 def login():
     login_url = 'http://reserves.lib.tsinghua.edu.cn/Account/LogIn'
     driver.get(login_url)
     try:
-        driver.find_element_by_id('i_user').send_keys('')
-        driver.find_element_by_id ('i_pass').send_keys('')
+        driver.find_element_by_id('i_user').send_keys('user') # username here
+        driver.find_element_by_id ('i_pass').send_keys('password') # password here
         driver.find_element_by_xpath('//a[text()="登录"]').click()
     except:
         pass
@@ -48,8 +48,8 @@ def getBookDetail():
     print(book_title)
     links_elements = ele.find_elements_by_tag_name('a')
     links_url = [e.get_attribute("href") for e in links_elements]
-    links_url = [u.replace('index.html', 'HTML5/index.html') for u in links_url]
-    
+    # links_url = [u.replace('index.html', 'HTML5/index.html') for u in links_url]
+    print(links_url)
     return links_url
 
 def downloadAllLinks(links):
@@ -58,13 +58,18 @@ def downloadAllLinks(links):
     print('{} chapters in all'.format(len(links)))
     for url in links:
         driver.get(url)
+        driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        time.sleep(3)
         print('Chapter: {}'.format(chp_index))
         chp_index+=1
-        pageCnt = driver.find_element_by_id ('textfield').get_attribute('value')
+        pageCnt = driver.find_element_by_id(
+            'currentPageIndexTextField').get_attribute('value')
+        # pageCnt = pageCnt.get_attribute('value')
         pageCnt = pageCnt.split('/')[-1]
         pageCnt = int(pageCnt)
         print('{} pages in this link'.format(pageCnt))
-        jpg_url_template = url.replace('index.html','m/{}.jpg')
+        jpg_url_template = url.replace(
+            'index.html', 'files/mobile/{}.jpg')
         for idx in range(1, pageCnt+1):
             jpg_url = jpg_url_template.format(idx)
             # driver.get(jpg_url)
